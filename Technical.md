@@ -1,144 +1,128 @@
-# ServiceNow Fundementals 
+# ServiceNow Fundamentals
 
-## Table Of Contents
+## Table of Contents
 - [Updates](#updates)
-- [ACL](#access)
-- [List](#list)
-- [Auto-close Timer](#auto-close)
-- [Notification](#notification)
+- [Access Control List (ACL)](#access-control-list-acl)
+- [Auto-Close Timer](#auto-close-timer)
+- [Notifications](#notifications)
 - [Scheduled Notifications](#scheduled-notifications)
-- [Life Cycle](#lifecycle)
-- [Mandatory](#mandatory)
+- [Incident Lifecycle](#incident-lifecycle)
+- [Mandatory Fields](#mandatory-fields)
+- [Scheduled Incident Updates](#scheduled-incident-updates)
+
 
 ---
 
 ## Updates
-- Every task is created with an Update Set. Access the local sets Under *System Update Sets -> Local Update Sets*
+- Every task is created within an Update Set. Access local sets under **System Update Sets -> Local Update Sets**.
 
 <p align="center">
-  <img src="assets/asset1.png?raw=true" alt="update set"/>
+  <img src="assets/asset1.png?raw=true" alt="Update Set"/>
 </p>
 
-- Tasks are marked as completed once the changes have been added below
+- Tasks are marked as completed once the changes have been added below.
 
 <p align="center">
-  <img src="assets/asset2.png?raw=true" alt="update set record"/>
-</p>
-
-
-## List
-#### Description: 
-Update the list view of Incidents for the Incident Manager to include 
-the following fields.
-- Number
-- Caller
-- Caller's location
-- Short Description
-- Priority
-- State
-- Assignment group
-- Assigned to
-- Created
-- Updated
-
-# Inpersonate and navigate to the *Service Desk -> Incidents*
-- Inpersonate as 'Incident Manager'
-<p align="center">
-  <img src="assets/List/asset13.png?raw=true" alt="update set"/>
-</p>
-
-<p align="center">
-  <img src="assets/List/asset14.png?raw=true" alt="update set"/>
+  <img src="assets/asset2.png?raw=true" alt="Update Set Record"/>
 </p>
 
 ---
 
-## Auto-Close
-#### Description: 
-Incidents should automatically be closed after 3 days after being resolved. 
 
-- Navigate to *Incident > Administration > Incident Properties*
-- Adjust the time for resolved incidents to close and uncheck 'Close open incident tickets'
+## Access Control List (ACL)
+### Description
+Ensure that the **Incident Number** field is read-only so that system users cannot manually edit the record number.
+
+### Steps
+#### 1. Verify User Permissions
+- As a **System Administrator**, elevate your role to ensure you have the `security_admin` role.
+- Navigate to **Organization -> Users** and verify the role assignment.
+
 <p align="center">
-  <img src="assets/Timer/asset15.png?raw=true" alt="update set"/>
+  <img src="assets/ACL/asset9.png?raw=true" alt="Verify Admin Role"/>
 </p>
 
-
-
-## Access
-#### Description: 
-Ensure that the number field on Incident is read-only and so that system users aren't able to manually edit a record's number.
-
-#### Navigate to Users
-- As system admin you must elevate your role check to make sure the admin has the security_admin role under *Organization -> Users*
-<p align="center">
-  <img src="assets/ACL/asset9.png?raw=true" alt="update set"/>
-</p>
 - Elevate the role by selecting the profile icon.
+
 <p align="center">
-  <img src="assets/ACL/asset10.png?raw=true" alt="update set"/>
+  <img src="assets/ACL/asset10.png?raw=true" alt="Elevate Role"/>
 </p>
 
-##### Access the ACL table
-- Navigate to *System Security -> Access Control (ACL)*
-- Create a new ACL as follows. 
+#### 2. Configure ACL
+- Navigate to **System Security -> Access Control (ACL)**.
+- Create a new ACL as shown below:
+
 <p align="center">
-  <img src="assets/ACL/asset11.png?raw=true" alt="update set"/>
+  <img src="assets/ACL/asset11.png?raw=true" alt="Create ACL"/>
 </p>
 
-### Create A script condition
-- Restrict all users except admin to modify the number field.
+#### 3. Add a Script Condition
+- Restrict all users except admins from modifying the **Incident Number** field.
+
 ```javascript
-    // Deny write access to the Incident number field
-    answer = false;
+// Deny write access to the Incident number field
+answer = false;
 ```
-- When inpersonating a user, the field should be grayed out where it cannot be modified.
+
+- When impersonating a user, the field should be grayed out, preventing modification.
+
 <p align="center">
-  <img src="assets/ACL/asset12.png?raw=true" alt="update set"/>
+  <img src="assets/ACL/asset12.png?raw=true" alt="Read-only Field"/>
 </p>
 
 ---
 
+## Auto-Close Timer
+### Description
+Incidents should automatically close **3 days after being resolved**.
 
+### Steps
+1. Navigate to **Incident > Administration > Incident Properties**.
+2. Adjust the time for resolved incidents to close and **uncheck** 'Close open incident tickets'.
 
-
-## Notification
-#### Description: 
-Notify the assignment group manager when a critical incident is assigned to their group. 
-
-- Access the Notification Records under *System Notification -> Email -> Notifications*
-
-#### Build the notification as follows.
 <p align="center">
-  <img src="assets/notification/asset3.png?raw=true" alt=""/>
-</p>
-<p align="center">
-  <img src="assets/notification/asset4.png?raw=true" alt=""/>
-</p>
-<p align="center">
-  <img src="assets/notification/asset5.png?raw=true" alt=""/>
+  <img src="assets/Timer/asset15.png?raw=true" alt="Auto-Close Timer"/>
 </p>
 
-### 3. Testing: 
- - Assign a Critical Priority Incident to the Assignment Group.
- - Check the Sent Emails log to confirm delivery:
- - Navigate to System Mailboxes → Outbound → Outbox
+---
+
+## Notifications
+### Description
+Notify the **Assignment Group Manager** when a critical incident is assigned to their group.
+
+### Steps
+1. Access **System Notification -> Email -> Notifications**.
+2. Configure the notification settings as follows:
+
+<p align="center">
+  <img src="assets/notification/asset3.png?raw=true" alt="Notification Setup"/>
+</p>
+<p align="center">
+  <img src="assets/notification/asset4.png?raw=true" alt="Notification Settings"/>
+</p>
+<p align="center">
+  <img src="assets/notification/asset5.png?raw=true" alt="Notification Example"/>
+</p>
+
+#### Testing
+- Assign a **Critical Priority Incident** to an assignment group.
+- Check the sent emails log:
+  - Navigate to **System Mailboxes -> Outbound -> Outbox**.
 
 ---
 
 ## Scheduled Notifications
-#### Description: 
-Requested Notification: Application Development incident count
+### Description
+Send a **weekly email** (every Monday) to the **Application Development Manager** with the count of active incidents.
 
-- Send an email every Monday with the number of active Incidents 
-assigned to the Application Development Manager at the start of the week.
+### Steps
+1. Configure the **Flow Designer** as shown below:
 
-### Build the flow as follows.
 <p align="center">
-  <img src="assets/schedule/asset6.png?raw=true" alt=""/>
+  <img src="assets/schedule/asset6.png?raw=true" alt="Flow Designer"/>
 </p>
 
-### Define an new WorkFlow Action with a script as follows.
+2. Define a **New Workflow Action** with the following script:
 ```javascript
 (function execute(inputs, outputs) {
     // Incident glide record
@@ -209,11 +193,12 @@ assigned to the Application Development Manager at the start of the week.
 ---
 
 
-## Lifecycle
-#### Description
-Enforce a lifecycle for incident states from the diagram below
+## Incident Lifecycle
+### Description
+Ensure incidents follow the state transitions as per the diagram below:
+
 <p align="center">
-  <img src="assets/lifecycle/asset16.png?raw=true" alt=""/>
+  <img src="assets/lifecycle/asset16.png?raw=true" alt="Incident Lifecycle"/>
 </p>
 
 #### Create a Business Rule for Incident Transitions
@@ -248,8 +233,8 @@ Enforce a lifecycle for incident states from the diagram below
 ```
 
 
-## Mandatory
-#### Description
+## Mandatory Fields
+### Description
 Enforce the following rules and create additional fields for On Hold reason: 
 
 - If the On Hold reason is Awaiting Change, the Change Request field is mandatory.
@@ -276,7 +261,7 @@ Enforce the following rules and create additional fields for On Hold reason:
 </p>
 
 
-#### Create an OnChange Client Script 
+#### Client Script
 ```javascript
 function onChange(control, oldValue, newValue, isLoading, isTemplate) {
         if (isLoading || newValue == '') {
@@ -318,3 +303,110 @@ function onChange(control, oldValue, newValue, isLoading, isTemplate) {
     }
 }
 ```
+
+
+## Scheduled Incident Updates
+### Description
+Automatically move **On Hold** incidents back to **In Progress** based on predefined conditions.
+
+
+## Following Cases
+1. If the reason is Awaiting Caller, after 3 business days (M-F) if not updated by the Caller
+2. If the reason is Awaiting Change, when the related Change is closed
+3. If the reason is Awaiting Problem, when the related Problem is closed
+4. If the reason is Awaiting Vendor, after 7 business days (M-F)
+
+#### Flow Implementation
+- Create flow that triggers daily at 12pm with the following structure.
+<p align="center">
+  <img src="assets/schedule/asset24.png?raw=true" alt=""/>
+</p>
+<p align="center">
+  <img src="assets/schedule/asset25.png?raw=true" alt=""/>
+</p>
+
+- For each case, add the following flow logic and action to update the queried records.
+<p align="center">
+  <img src="assets/schedule/asset23.png?raw=true" alt=""/>
+</p>
+
+#### CASE 1: Script the 'Look Up Records' condition
+```javascript
+  // Retrieve the business day with holiday exclusion schedule. 
+  var sgr = new GlideRecord('cmn_schedule');
+  sgr.addQuery('name','8-5 weekdays excluding holidays');
+  sgr.query();
+
+  if (sgr.next()) {
+    var schedule = new GlideSchedule(sgr.sys_id);
+    
+    // Calculate the time from 3 business days ago
+    var now = new GlideDateTime();
+    var startTime = schedule.getPreviousStartDate(now, new GlideDuration('72:00:00')); // 72 hours (3 business days)
+
+
+    // Retrieve the glide record that has been awaiting caller for 3 business days.
+    var gr = new GlideRecord('incident');
+    gr.addQuery('state', '3');
+    gr.addQuery('hold_reason', 'Awaiting Caller');
+    gr.addQuery('sys_updated_on', '<=', startTime);
+    gr.query();
+
+    var records = [];
+
+    while (gr.next()) {
+        records.push(gr.getEncodedQuery());
+        gs.info('Incident found: ' + gr.number + ' | Last updated: ' + gr.sys_updated_on);
+    }
+    return records.join('^OR'); // Return an OR-separated encoded query string
+  }
+  gs.info('No Incidents found');
+  return "";
+```
+
+#### CASES 2-3: Use the Conditional Builder
+- Case 2: Awaiting Change, when the related Change is closed
+<p align="center">
+  <img src="assets/schedule/asset26.png?raw=true" alt=""/>
+</p> 
+
+- Case 3: Awaiting Problem, when the related Problem is closed
+<p align="center">
+  <img src="assets/schedule/asset27.png?raw=true" alt=""/>
+</p> 
+
+
+#### CASES 4: Script the 'Look Up Records' condition
+```javascript
+// Retrieve the business day with holiday exclusion schedule. 
+var sgr = new GlideRecord('cmn_schedule');
+sgr.addQuery('name','8-5 weekdays excluding holidays');
+sgr.query();
+
+if (sgr.next()) {
+    var schedule = new GlideSchedule(sgr.sys_id);
+    
+    // Calculate the time from 7 business days ago
+    var now = new GlideDateTime();
+    var startTime = schedule.getPreviousStartDate(now, new GlideDuration('168:00:00')); // 168 hours (7 business days)
+
+
+    // Retrieve the glide record that has been awaiting caller for 3 business days.
+    var gr = new GlideRecord('incident');
+    gr.addQuery('state', '3');
+    gr.addQuery('hold_reason', 'Awaiting Caller');
+    gr.addQuery('sys_updated_on', '<=', startTime);
+    gr.query();
+
+    var records = [];
+
+    while (gr.next()) {
+        records.push(gr.getEncodedQuery());
+        gs.info('Incident found: ' + gr.number + ' | Last updated: ' + gr.sys_updated_on);
+    }
+    return records.join('^OR'); // Return an OR-separated encoded query string
+}
+gs.info('No Incidents found');
+return "";
+```
+
