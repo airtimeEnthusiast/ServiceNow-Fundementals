@@ -1,5 +1,5 @@
 # ServiceNow Fundamentals
-
+- A collection of tasks using a service-now PDI. 
 ## Table of Contents
 - [Updates](#updates)
 - [Access Control List (ACL)](#access-control-list-acl)
@@ -9,6 +9,8 @@
 - [Incident Lifecycle](#incident-lifecycle)
 - [Mandatory Fields](#mandatory-fields)
 - [Scheduled Incident Updates](#scheduled-incident-updates)
+- [Update Incident Priority Calculation](#update-incident-priority-calculation)
+-[Update Incident Priority For VIPs](#update-incident-priority-for-vips)
 
 
 ---
@@ -81,7 +83,7 @@ Incidents should automatically close **3 days after being resolved**.
 2. Adjust the time for resolved incidents to close and **uncheck** 'Close open incident tickets'.
 
 <p align="center">
-  <img src="assets/Timer/asset15.png?raw=true" alt="Auto-Close Timer"/>
+  <img src="assets/timer/asset15.png?raw=true" alt="Auto-Close Timer"/>
 </p>
 
 ---
@@ -309,13 +311,11 @@ function onChange(control, oldValue, newValue, isLoading, isTemplate) {
 ### Description
 Automatically move **On Hold** incidents back to **In Progress** based on predefined conditions.
 
-
-## Following Cases
+#### Following Cases
 1. If the reason is Awaiting Caller, after 3 business days (M-F) if not updated by the Caller
 2. If the reason is Awaiting Change, when the related Change is closed
 3. If the reason is Awaiting Problem, when the related Problem is closed
 4. If the reason is Awaiting Vendor, after 7 business days (M-F)
-
 #### Flow Implementation
 - Create flow that triggers daily at 12pm with the following structure.
 <p align="center">
@@ -410,3 +410,40 @@ gs.info('No Incidents found');
 return "";
 ```
 
+
+## Update Incident Priority Calculation
+### Description
+The Incident priority calculation will be updated so that an Incident with a **Medium impact** does not have a priority less than **Moderate**
+An Incident priority calculation should be updated so that when it considered a medium impact when:
+1. The Urgency is High, the Priority is Critical
+2. The Urgency is Low, the Priority is Moderate
+
+To update the incident priority calculation by first accessing **Alls-> System Policy -> Rules -> Priority Lookup Rules**
+<p align="center">
+  <img src="assets/priority/asset28.png?raw=true" alt=""/>
+</p>
+
+- In the proirity data lookup table, records, *100*, *300*, 
+*600* will be modified to reflect the rules.
+<p align="center">
+  <img src="assets/priority/asset29.png?raw=true" alt=""/>
+</p>
+
+## Update Incident Priority For VIPs
+### Description
+As the Incident Manager, I want the system to always set the Priority to Critical if the Incident's caller is a VIP so that their tickets are always treated with urgency.
+
+#### Flow Implementation
+- Create flow that triggers when an incident is generated that will update the priority to critical if the caller is a VIP.
+
+<p align="center">
+  <img src="assets/vip/asset30.png?raw=true" alt=""/>
+</p> 
+
+<p align="center">
+  <img src="assets/vip/asset31.png?raw=true" alt=""/>
+</p> 
+
+<p align="center">
+  <img src="assets/vip/asset32.png?raw=true" alt=""/>
+</p> 
