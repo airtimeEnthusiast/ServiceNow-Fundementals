@@ -10,8 +10,10 @@
 - [Mandatory Fields](#mandatory-fields)
 - [Scheduled Incident Updates](#scheduled-incident-updates)
 - [Update Incident Priority Calculation](#update-incident-priority-calculation)
--[Update Incident Priority For VIPs](#update-incident-priority-for-vips)
-
+- [Update Incident Priority For VIPs](#update-incident-priority-for-vips)
+- [Create a Catalog Item To Elevate Role](#create-a-catalog-item-to-elevate-role)
+- [Make changes to update Incident SLAs](#make-changes-to-update-incident-slas)
+- [Create Reporting User Groups](#create-reporting-user-groups)
 
 ---
 
@@ -412,7 +414,6 @@ return "";
 
 
 ## Update Incident Priority Calculation
-### Description
 The Incident priority calculation will be updated so that an Incident with a **Medium impact** does not have a priority less than **Moderate**
 An Incident priority calculation should be updated so that when it considered a medium impact when:
 1. The Urgency is High, the Priority is Critical
@@ -428,6 +429,8 @@ To update the incident priority calculation by first accessing **Alls-> System P
 <p align="center">
   <img src="assets/priority/asset29.png?raw=true" alt=""/>
 </p>
+
+#################### UPDATE GRAMMER 
 
 ## Update Incident Priority For VIPs
 ### Description
@@ -447,3 +450,229 @@ As the Incident Manager, I want the system to always set the Priority to Critica
 <p align="center">
   <img src="assets/vip/asset32.png?raw=true" alt=""/>
 </p> 
+
+
+## Secure User Records
+### Description 
+Prevent other sys_users from editing records apart from their own. 
+
+#### Create a new write ACL
+<p align="center">
+  <img src="assets/secure_records/asset33.png?raw=true" alt=""/>
+</p> 
+<p align="center">
+  <img src="assets/secure_records/asset34.png?raw=true" alt=""/>
+</p> 
+
+#### Script Implementation
+```javascript
+  // Allow if user is admin, user_admin, or updating their own record
+if (gs.hasRole('admin') || 
+	gs.hasRole('user_admin') || 
+	current.sys_id == gs.getUserID()) {
+    answer = true;
+}
+else{
+	answer = false;
+}
+```
+
+#### Disable other ACL's that prevent writes
+Other ACL's that act on the fields of the sys_user need to be disabled.
+<p align="center">
+  <img src="assets/secure_records/asset35.png?raw=true" alt=""/>
+</p>
+
+#### Disable ACL user* read 
+Disabling this ACL allows other users to read other user's records.
+<p align="center">
+  <img src="assets/secure_records/asset36.png?raw=true" alt=""/>
+</p> 
+
+#### Create a new Write ACL
+<p align="center">
+  <img src="assets/secure_records/asset37.png?raw=true" alt=""/>
+</p> 
+
+```javascript
+if (gs.getUserID() == current.sys_id || gs.getUser().hasRoles()) 
+    answer = true;
+else 
+    answer = false;
+```
+
+
+## Create a Catalog Item To Elevate Role
+#### Description 
+Create a catalog item that will automate the addition of users to specific groups, granting them additional access within the platform, so this process does not have to be managed manually.
+<p align="center">
+  <img src="assets/catalog/asset0.png?raw=true" alt=""/>
+</p> 
+Catalog item should implement a flow that confirms to the following diagram.
+<p align="center">
+  <img src="assets/catalog/assetflow.png?raw=true" alt=""/>
+</p> 
+
+#### Create a Catalog Item
+Navigate to *Service Catalog->Catalog->Maintain Items* to create a new catalog item.
+<p align="center">
+  <img src="assets/catalog/asset1.png?raw=true" alt=""/>
+</p> 
+Modify the portal settings to include an on-submit button.
+<p align="center">
+  <img src="assets/catalog/asset2.png?raw=true" alt=""/>
+</p>
+
+### Create the Catalog Variables in the following order
+<p align="center">
+  <img src="assets/catalog/asset3.png?raw=true" alt=""/>
+</p>
+
+#### Requested_For Variable
+This variable references the sys_user table and will load the current user into the field.
+<p align="center">
+  <img src="assets/catalog/asset4.png?raw=true" alt=""/>
+</p>
+<p align="center">
+  <img src="assets/catalog/asset5.png?raw=true" alt=""/>
+</p>
+<p align="center">
+  <img src="assets/catalog/asset6.png?raw=true" alt=""/>
+</p>
+
+#### Autopopulate Variables
+The following variables ```phone```, ```department```, and ```email``` all implement the autopopulate function that is dependent on the ```requested_for``` field.
+<p align="center">
+  <img src="assets/catalog/asset7.png?raw=true" alt=""/>
+</p>
+<p align="center">
+  <img src="assets/catalog/asset8.png?raw=true" alt=""/>
+</p>
+<p align="center">
+  <img src="assets/catalog/asset9.png?raw=true" alt=""/>
+</p>
+
+#### Request Access Variable
+References the *sys_user_group* table.
+<p align="center">
+  <img src="assets/catalog/asset10.png?raw=true" alt=""/>
+</p>
+<p align="center">
+  <img src="assets/catalog/asset11.png?raw=true" alt=""/>
+</p>
+
+#### Client Script to Autopopulate fields
+<p align="center">
+  <img src="assets/catalog/asset12.png?raw=true" alt=""/>
+</p>
+
+```javascript
+function onChange(control, oldValue, newValue, isLoading) {
+   if (isLoading || newValue == '') {
+      return;
+   }
+    // Get reference field (sys_user)
+   var req_for = g_form.getReference('requested_for', setFields);
+
+   //Set the fields of the catalog form
+   function setFields(req_for){
+        var deptID = req_for.department;	// Retrieve the department sys_id
+
+		// Intialize and fetch the department record
+        var grDept = new GlideRecord('cmn_department');
+		if(grDept.get(deptID)){
+			g_form.setValue('department', grDept.name); // Set department name.
+		}
+		// Set email and phone
+		g_form.setValue('email',req_for.email);
+		g_form.setValue('phone',req_for.mobile_phone);
+	}
+}
+```
+
+#### Client Script to Get the Current User
+<p align="center">
+  <img src="assets/catalog/asset13.png?raw=true" alt=""/>
+</p>
+
+```javascript
+function onLoad() {
+   //Set the g_form field 'requested_for' to the current user. 
+   g_form.setValue('requested_for', g_user.userID);
+}
+```
+
+#### Catalog Item Form<p align="center">
+- Create and customize the layout of the form by accessing: *Service Catalog->Catalog Builder*
+  <img src="assets/catalog/asset15.png?raw=true" alt=""/>
+</p>
+
+#### Implement the Flow With a Catalog Item Trigger
+- Create a flow variable approval_count (integer) to count the number of manager approvals.
+<p align="center">
+  <img src="assets/catalog/assetflowDesign.png?raw=true" alt=""/>
+</p>
+
+
+## Make changes to update Incident SLAs 
+- The Incident SLAs need to be updated to run for the times outline below. Additionally, I do not want SLAs to run outside of business hours, so that our metrics accurately reflect our hours of operation (8AM to 5PM). SLAs should also not run during US holidays.
+
+- Priority 1 resolution: 4 hours
+- Priority 2 resolution: 1 business days
+- Priority 3 resolution: 2 business days
+- Priority 4 resolution: 5 business days
+
+Modify the SLA definitions by accesing *Service Level Mangement -> SLA -> SLA Definitions*
+<p align="center">
+  <img src="assets/SLAs/asset1.png?raw=true" alt=""/>
+</p>
+<p align="center">
+  <img src="assets/SLAs/asset2.png?raw=true" alt=""/>
+</p>
+
+
+## Create Reporting User Groups
+
+Create the following groups:
+
+<p align="center">
+  <img src="assets/Groups/asset2.png?raw=true" alt=""/>
+</p>
+
+- Users able to view reports shared with them and create reports for themselves
+<p align="center">
+  <img src="assets/Groups/asset1.png?raw=true" alt=""/>
+</p>
+
+- Users able to create and share reports with groups they are members of
+<p align="center">
+  <img src="assets/Groups/asset3.png?raw=true" alt=""/>
+</p>
+
+- Users able to create, share, and publish report
+<p align="center">
+  <img src="assets/Groups/asset4.png?raw=true" alt=""/>
+</p>
+
+## Prevent Incident state from being edited in the list view
+- Create an onCellEdit *Client Script* 
+<p align="center">
+  <img src="assets/ACL/asset13.png?raw=true" alt=""/>
+</p>
+
+- Create the script with the following newValue condition.
+```javascript
+function onCellEdit(sysIDs, table, oldValues, newValue, callback) {
+  var saveAndClose = true;
+  //Type appropriate comment here, and begin script below
+  if(newValue.name === 'state'){
+	  alert("Unable to edit the 'State' field from the list view is not allowed.");
+	  var saveAndClose = false;
+ }
+ 
+ callback(saveAndClose); 
+}
+```
+
+## Update the Service Portal
+- Update the layout of the service portal layout so users can see their open
