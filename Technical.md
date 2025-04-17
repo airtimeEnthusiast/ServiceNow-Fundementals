@@ -610,7 +610,7 @@ function onLoad() {
 #### Implement the Flow With a Catalog Item Trigger
 - Create a flow variable approval_count (integer) to count the number of manager approvals.
 <p align="center">
-  <img src="assets/catalog/assetflowDesign.png?raw=true" alt=""/>
+  <img src="assets/catalog/assetFlowDesign.png?raw=true" alt=""/>
 </p>
 
 
