@@ -1,5 +1,4 @@
 # Servicenow Fundementals
-- Collection of guides and questions to understand some fundementals of Servicenow. 
  - Understanding of ServiceNow Common Service Data Model 4.0
  - Custom Application Development using ServiceNow
  - ServiceNow table APIs
